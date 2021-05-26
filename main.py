@@ -76,9 +76,9 @@ if __name__=="__main__":
     # print("Wish done")
     while(True):
         query=takeCommand().lower()
-        if query=="stop" or query=="ok":
+        if "stop" in query or "ok" in query :
             break
-
+        
         if "wikipedia" in query:
             speak("Searching wikipedia")
             query=query.replace("wikipedia","")
@@ -107,7 +107,8 @@ if __name__=="__main__":
             speak(f"Today is {d1}")
         elif "day" in "query":
             now=dt.datetime.now()
-            speak("Today is {now.strftime(\"%A\")}")
+            day=now.strftime("%A")
+            speak("Today is {day}")
         # elif 'open vscode':
         #     vsPath="Enter file path"  #Correct path needed
         #     os.startfile(vsPath)
@@ -124,4 +125,19 @@ if __name__=="__main__":
                 speak("Email sent successfully")
             except Exception as e:
                 print(e)
-                speak("Sorry an error occured")                  
+                speak("Sorry an error occured")
+        elif "who made you" in query or "who created you" in query:
+            speak("I have been created by Vashishtha")
+        elif "who are you" in query:
+            speak("I am your virtual assistant created by Vashishtha")
+        elif "who i am" in query:
+            speak("If you talk then definately you are human.")
+        elif "why you came to world" in query:
+            speak("Thanks to Vashishtha, further it's a secret")
+        elif 'how are you' in query:
+            speak("I am fine, Thank you")
+            speak("How are you, Sir")
+        elif 'fine' in query or "good" in query:
+            speak("It's good to know that your fine")
+        
+ 
