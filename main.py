@@ -6,7 +6,7 @@ import wikipedia
 import webbrowser
 import os
 import smtplib
-
+import requests
  
 engine= pyttsx3.init('sapi5')
 voices=engine.getProperty('voices')
@@ -37,7 +37,7 @@ def takeCommand():
     with sr.Microphone() as source:
         print("Listening....")
         r.pause_threshold=1
-        r.energy_threshold=500
+        r.energy_threshold=400
         audio = r.listen(source)
 
     try:
@@ -58,6 +58,9 @@ def sendEmail(to, content):
     server.close()
 
 def getCoordinates(weather):
+    """
+    Gives coordnates of the user by his ip address, and sends these coordinates to get weather details
+    """
     import geocoder
     g=geocoder.ip("me")
     lat=g.lat
@@ -65,10 +68,53 @@ def getCoordinates(weather):
     if weather:
         getWeather(lat,lng)
     else:
-        speak(f"The latituge is {lat} and longitude is {lng}")
+        speak(f"We are in {g.address}")
+        # speak(f"The latituge is {lat} and longitude is {lng}")
 
-def getWeather(lat,lng):
-    print("Weather")
+def getWeather(lat,lon):
+    '''
+    Gives weather of your current location
+    '''
+    apiKey2="Your API Key"   #Enter your apiKey
+    baseUrl=f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric&appid={apiKey2}"
+    data=requests.get(baseUrl)
+    if(data.status_code==200):
+        print(data.status_code)
+        print(data.json())
+        response=data.json()
+        m=response['main']
+        temp=m['temp']
+        weather=response['weather']
+        des=weather[0]['description']
+        print(f"It's {des} and tempearture is {temp} degree celsius")
+        speak((f"It's {des} and tempearture is {temp} degree celsius"))
+    else:
+        speak("Sorry, some network issue maybe")
+
+
+def getNews():
+    """
+    Gives the Top 3 headlines 
+    """
+    try:
+        from newsapi import NewsApiClient
+        apikey="Your API Key" #Enter your apiKey
+        # Init
+        newsapi = NewsApiClient(api_key=apikey)
+
+        # /v2/top-headlines
+        top_headlines = newsapi.get_top_headlines(country='in',language='en')
+        i=1
+        for item in top_headlines['articles']:
+            print(f"{i}. {item['title']} \n")
+            speak(f"{i}. {item['title']}")
+            i+=1
+            if(i>3):
+                break
+    except:
+        speak("Sorry, some network issue maybe")
+
+
 
 if __name__=="__main__":
     # speak("Hello. This is your voice assistant")
@@ -92,11 +138,11 @@ if __name__=="__main__":
             webbrowser.open("google.com")
         elif 'open github' in query:
             webbrowser.open('github.com')
-        # elif 'play music' in query:
-        #     music_dir="Enter music dir path"   #Correct path needed
-        #     songs= os.listdir(music_dir)
-        #     print(songs)
-        #     os.startfile(os.path.join(music_dir,songs[0]))
+        elif 'play music' in query:
+            music_dir="Enter music dir path"   #Correct path needed
+            songs= os.listdir(music_dir)
+            print(songs)
+            os.startfile(os.path.join(music_dir,songs[0]))
         elif "time" in query:
             timeNow=dt.datetime.now().strftime("%H:%M:%S")
             print(f"The time is {timeNow}")
@@ -109,10 +155,10 @@ if __name__=="__main__":
             now=dt.datetime.now()
             day=now.strftime("%A")
             speak("Today is {day}")
-        # elif 'open vscode':
-        #     vsPath="Enter file path"  #Correct path needed
-        #     os.startfile(vsPath)
-        elif "location" in query:
+        elif 'open vscode' in query:
+            vsPath="Enter file path"  #Correct path needed
+            os.startfile(vsPath)
+        elif "location" in query or "where am i" in query or "where are we" in query:
             getCoordinates(False)
         elif "weather" in query:
             getCoordinates(True)
@@ -139,5 +185,9 @@ if __name__=="__main__":
             speak("How are you, Sir")
         elif 'fine' in query or "good" in query:
             speak("It's good to know that your fine")
+        elif 'news' in query:
+            getNews()
+        else:
+            speak("Sorry, I didn't hear you.")          
         
  
